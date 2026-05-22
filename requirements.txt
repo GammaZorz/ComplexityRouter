@@ -1,3 +1,10 @@
+# Core
 anthropic>=0.40.0
 python-dotenv>=1.0.0
 mcp>=1.20.0
+
+# Required for OpenRouter provider and LiteLLM proxy mode
+openai>=1.0.0
+
+# Optional: LiteLLM SDK mode (100+ providers without a proxy)
+# pip install litellm

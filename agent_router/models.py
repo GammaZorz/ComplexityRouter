@@ -1,43 +1,26 @@
-"""Model registry — maps complexity tiers to provider + model configurations."""
+"""Model registry — loads tier→model mapping from Settings."""
 
 from __future__ import annotations
 
-from typing import Any
-
-from .config import DEFAULT_MAX_TOKENS
 from .schemas import ComplexityScore, ModelSelection
+from .settings import Settings, get_settings
 
 
-# ---------------------------------------------------------------------------
-# Registry: each tier maps to a provider, model_id, and max_tokens.
-# Add non-Claude entries here later (e.g. "openai", "ollama").
-# ---------------------------------------------------------------------------
-MODEL_REGISTRY: dict[str, dict[str, Any]] = {
-    "simple": {
-        "provider": "anthropic",
-        "model_id": "claude-haiku-4-5-20251001",
-        "max_tokens": DEFAULT_MAX_TOKENS["simple"],
-    },
-    "medium": {
-        "provider": "anthropic",
-        "model_id": "claude-sonnet-4-6",
-        "max_tokens": DEFAULT_MAX_TOKENS["medium"],
-    },
-    "complex": {
-        "provider": "anthropic",
-        "model_id": "claude-opus-4-7",
-        "max_tokens": DEFAULT_MAX_TOKENS["complex"],
-    },
-}
+def select_model(
+    complexity: ComplexityScore,
+    settings: Settings | None = None,
+) -> ModelSelection:
+    """Look up the model for the given complexity tier from settings."""
+    s = settings or get_settings()
+    entry = s.model_for_tier(complexity.tier)
+    max_tokens = s.max_tokens_for_tier(complexity.tier)
 
-
-def select_model(complexity: ComplexityScore) -> ModelSelection:
-    """Look up the registry entry for the given complexity tier."""
-    entry = MODEL_REGISTRY[complexity.tier]
     return ModelSelection(
         model_id=entry["model_id"],
         provider=entry["provider"],
-        max_tokens=entry["max_tokens"],
-        rationale=f"Tier '{complexity.tier}' (score {complexity.score}) "
-                  f"routed to {entry['model_id']}",
+        max_tokens=max_tokens,
+        rationale=(
+            f"Tier '{complexity.tier}' (score {complexity.score}) "
+            f"→ {entry['model_id']} via {entry['provider']}"
+        ),
     )

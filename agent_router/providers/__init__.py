@@ -1,4 +1,4 @@
-"""Provider adapters — abstract base and concrete implementations."""
+"""Provider adapters."""
 
 from .base import BaseProvider
 from .anthropic import AnthropicProvider
